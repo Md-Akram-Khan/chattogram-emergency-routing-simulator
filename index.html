@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chattogram Port City Emergency Vehicle Dispatch & Routing Simulator</title>
+  <meta name="description" content="AI/ML Emergency Vehicle Routing & Algorithm Simulation in Chattogram Port City using BFS, DFS, UCS, IDS, A*, and Greedy Best-First Search under dynamic urban constraints.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Header / Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M19 10.5V6h-3c0-1.66-1.34-3-3-3s-3 1.34-3 3H7v4.5C7 15.19 10.81 19 15.5 19s8.5-3.81 8.5-8.5zm-6.5-6c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zM12 17.5c-3.04 0-5.5-2.46-5.5-5.5V12h11v.5c0 3.04-2.46 5.5-5.5 5.5z"/>
+          <path d="M12 2L1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2v-4h2v4z" opacity="0.3"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="brand-title">Chattogram Emergency Routing Simulator</h1>
+        <p class="brand-subtitle">High-Density AI Search Algorithms under Tidal Waterlogging, Port Lorry Congestion & Hilly Corridor Constraints</p>
+      </div>
+    </div>
+
+    <div class="nav-links">
+      <button class="nav-btn active" data-tab="tab-map">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 15 22 23 18 23 2 15 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="15" y1="6" x2="15" y2="22"></line></svg>
+        Map & Simulator
+      </button>
+      <button class="nav-btn" data-tab="tab-benchmark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        Benchmark & Charts
+      </button>
+      <button class="nav-btn" data-tab="tab-analysis">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        Formulas & Model
+      </button>
+    </div>
+  </nav>
+
+  <!-- Scenario Quick Presets Bar for Chattogram -->
+  <div class="presets-bar">
+    <span class="presets-label">⚡ Real Scenarios:</span>
+    <button class="preset-chip" data-preset="monsoon-flood">🌊 Tidal Flood (Halishahar ➔ CMCH)</button>
+    <button class="preset-chip" data-preset="port-fire">🔥 Port Industrial Fire (CEPZ ➔ Imperial Hosp)</button>
+    <button class="preset-chip" data-preset="midnight-cardiac">🚑 Airport Emergency (Airport ➔ Evercare Hosp)</button>
+    <button class="preset-chip" data-preset="old-ctg-block">⛔ Khatunganj Alley Blockade (Khatunganj ➔ CMCH)</button>
+    <button class="preset-chip" data-preset="bypass-route">🚀 Highway Bypass (Oxygen ➔ BITID Faujdarhat)</button>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    
+    <!-- Sidebar Control Panel -->
+    <aside class="sidebar">
+      <div>
+        <div class="section-title">
+          <span>Routing Parameters</span>
+          <span style="color: var(--accent-cyan);">Step 1</span>
+        </div>
+
+        <div class="control-card">
+          <div class="control-group">
+            <label class="control-label" for="select-start">Emergency Depot / Start 🏁</label>
+            <select id="select-start" class="select-input"></select>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="select-target">Destination Hospital / Goal 🏥</label>
+            <select id="select-target" class="select-input"></select>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="select-algo">Search Algorithm</label>
+            <select id="select-algo" class="select-input">
+              <option value="astar">A* Search (Optimal Informed)</option>
+              <option value="ucs">UCS / Dijkstra (Uniform Cost)</option>
+              <option value="bfs">BFS (Breadth-First Search)</option>
+              <option value="dfs">DFS (Depth-First Search)</option>
+              <option value="ids">IDS (Iterative Deepening Search)</option>
+              <option value="gbfs">Greedy Best-First Search</option>
+              <option value="all">⚡ COMPARE ALL 6 ALGORITHMS</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">
+          <span>Dynamic Real Conditions</span>
+          <span style="color: var(--accent-amber);">Real-Time</span>
+        </div>
+
+        <div class="control-card">
+          <!-- Traffic Congestion Slider -->
+          <div class="control-group">
+            <div class="control-label">
+              <span>Traffic & Port Lorry Congestion</span>
+              <span id="val-traffic" class="value-badge">2.2x</span>
+            </div>
+            <input type="range" id="slider-traffic" class="range-input" min="1.0" max="3.5" step="0.1" value="2.2">
+          </div>
+
+          <!-- Waterlogging Slider -->
+          <div class="control-group">
+            <div class="control-label">
+              <span>Tidal Waterlogging (Jolaboddhota)</span>
+              <span id="val-flood" class="value-badge">1.2m</span>
+            </div>
+            <input type="range" id="slider-flood" class="range-input" min="0.0" max="2.5" step="0.1" value="1.2">
+          </div>
+
+          <!-- Time of Day Switch -->
+          <div class="control-group">
+            <label class="control-label">Time of Day (Safety Impact)</label>
+            <div class="segmented-control">
+              <button class="segment-btn" data-time="day">☀️ Day Time</button>
+              <button class="segment-btn active" data-time="night">🌙 Night Time</button>
+            </div>
+          </div>
+
+          <!-- Season Select -->
+          <div class="control-group">
+            <label class="control-label" for="select-season">Weather / Season</label>
+            <select id="select-season" class="select-input">
+              <option value="monsoon">🌧️ Monsoon Rain & Tidal High Tide</option>
+              <option value="dry">☀️ Dry Summer</option>
+              <option value="winter">🌫️ Winter Foggy Night</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-top: auto;">
+        <button id="btn-run-sim" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Run Emergency Routing Simulation
+        </button>
+        <button id="btn-open-gmaps" class="btn-secondary" style="display: none; background: rgba(66, 133, 244, 0.15); border-color: rgba(66, 133, 244, 0.4); color: #4285f4;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          Open Route in Google Maps
+        </button>
+      </div>
+    </aside>
+
+    <!-- Right View Area (Large Map Focus) -->
+    <main class="view-area">
+
+      <!-- TAB 1: MAP & SIMULATOR -->
+      <div id="tab-map" class="tab-pane active">
+        <div id="map-container">
+          <!-- Leaflet Map Canvas -->
+          <div id="map"></div>
+
+          <!-- Map Floating Overlay Stats -->
+          <div class="map-overlay-stats">
+            <div class="stat-item">
+              <span class="stat-title">Dynamic Path Cost</span>
+              <span id="stat-cost" class="stat-value">--</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-title">Physical Distance</span>
+              <span id="stat-dist" class="stat-value">-- km</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-title">Est. Travel Time</span>
+              <span id="stat-time" class="stat-value">-- mins</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-title">Expanded Nodes</span>
+              <span id="stat-nodes" class="stat-value">--</span>
+            </div>
+          </div>
+
+          <!-- Map Color Legend Overlay -->
+          <div class="map-legend-overlay">
+            <div style="font-weight: 700; color: #fff; margin-bottom: 2px;">Map Legend</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #10b981;"></div> Clear / Low Cost Road</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #f59e0b;"></div> Moderate Traffic / Flood</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #ef4444;"></div> High Congestion / Submerged</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #a855f7;"></div> Blocked / Impassable</div>
+            <div class="legend-item"><div class="legend-dot" style="background: #00f2fe; box-shadow: 0 0 6px #00f2fe;"></div> Computed Path</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: BENCHMARK & CHARTS -->
+      <div id="tab-benchmark" class="tab-pane">
+        <div class="benchmark-container">
+          
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary);">Algorithm Performance Benchmark (Chattogram Metro)</h2>
+              <p style="font-size: 0.85rem; color: var(--text-secondary);">Comparative evaluation of 6 AI search algorithms across 45 high-density nodes in Chattogram.</p>
+            </div>
+            <button id="btn-export-csv" class="btn-secondary" style="width: auto;">
+              📥 Export Benchmark CSV
+            </button>
+          </div>
+
+          <!-- Charts Grid -->
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-header">
+                <span class="chart-title">Nodes Expanded (Search Efficiency)</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="chart-nodes"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-header">
+                <span class="chart-title">Execution Time (Milliseconds)</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="chart-time"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-header">
+                <span class="chart-title">Total Dynamic Cost vs Physical Distance (km)</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="chart-cost-distance"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-header">
+                <span class="chart-title">Multi-Criteria Evaluation (Radar Comparison)</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="chart-radar"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detailed Comparison Table Card -->
+          <div class="table-card">
+            <div class="chart-header">
+              <span class="chart-title">Comprehensive Algorithm Comparison Matrix</span>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Algorithm</th>
+                    <th>Status</th>
+                    <th>Dynamic Cost</th>
+                    <th>Distance (km)</th>
+                    <th>Est. Time (mins)</th>
+                    <th>Nodes Expanded</th>
+                    <th>Max Queue Size</th>
+                    <th>Execution Time (ms)</th>
+                  </tr>
+                </thead>
+                <tbody id="table-results-body">
+                  <!-- JS Populated Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 3: FORMULAS & DYNAMIC MODEL -->
+      <div id="tab-analysis" class="tab-pane">
+        <div class="analysis-container">
+          
+          <article class="analysis-article">
+            <h2>Real-World Dynamic Cost & Heuristic Model for Chattogram Metro</h2>
+            <p>
+              Chattogram's extended network of 45 high-density nodes incorporates key hospitals (CMCH, Evercare, Imperial, Max, General Hospital, BITID), port gates (Port Gate 1, Custom House, Saltgola, CEPZ), flyovers, coastal embankments in Halishahar, and northern highway bypasses.
+            </p>
+
+            <h3>1. Dynamic Edge Cost Function C(u, v)</h3>
+            <p>The dynamic traversal cost for an emergency vehicle along road segment \((u, v)\) is formulated as:</p>
+            
+            <div class="formula-box">
+              C(u, v) = Distance(u, v) &times; w_road &times; PortLorryTraffic &times; TidalFloodFactor &times; SafetyFactor + JunctionDelay
+            </div>
+
+            <h3>2. Admissible Heuristic Function H(n)</h3>
+            <p>For informed search algorithms (**A* Search** and **Greedy BFS**), the heuristic estimate \(H(n)\) uses straight-line Haversine distance scaled to maintain admissibility:</p>
+
+            <div class="formula-box">
+              H(n, Goal) = HaversineDistance(n.lat, n.lng, Goal.lat, Goal.lng) &times; 0.8
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Application Modules -->
+  <script src="js/chattogram_graph.js"></script>
+  <script src="js/dynamic_cost.js"></script>
+  <script src="js/algorithms.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
